@@ -28,7 +28,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 from .generic import *
-from .utils import isString, str_
+from .utils import isString, str_, PdfReadError
 from .pdf import PdfFileReader, PdfFileWriter
 from .pagerange import PageRange
 from sys import version_info
@@ -297,6 +297,11 @@ class PdfFileMerger(object):
         prev_header_added = True
         for k, o in list(dests.items()):
             for j in range(*pages):
+                if not pdf.getPage(j) or not o['/Page']:
+                    if not pdf.strict:
+                        continue
+                    else:
+                        raise PdfReadError("Page object is missing")
                 if pdf.getPage(j).getObject() == o['/Page'].getObject():
                     o[NameObject('/Page')] = o['/Page'].getObject()
                     assert str_(k) == str_(o['/Title'])

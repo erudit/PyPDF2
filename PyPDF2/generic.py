@@ -176,7 +176,13 @@ class IndirectObject(PdfObject):
         self.pdf = pdf
 
     def getObject(self):
-        return self.pdf.getObject(self).getObject()
+        this_object = self.pdf.getObject(self)
+        if this_object:
+            return this_object.getObject()
+        elif not self.pdf.strict:
+            return NullObject()
+        else:
+            raise utils.PdfReadError("Cannot read null object")
 
     def __repr__(self):
         return "IndirectObject(%r, %r)" % (self.idnum, self.generation)

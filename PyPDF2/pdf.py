@@ -1509,8 +1509,10 @@ class PdfFileReader(object):
             elif isString(dest) and dest in self._namedDests:
                 outline = self._namedDests[dest]
                 outline[NameObject("/Title")] = title
+            elif not self.pdf.strict:
+                return None
             else:
-                raise utils.PdfReadError("Unexpected destination %r" % dest)
+                raise utils.PdfReadError("Could not find object.")
         return outline
 
     pages = property(lambda self: ConvertFunctionsToVirtualList(self.getNumPages, self.getPage),
@@ -1691,8 +1693,8 @@ class PdfFileReader(object):
         else:
             warnings.warn("Object %d %d not defined."%(indirectReference.idnum,
                         indirectReference.generation), utils.PdfReadWarning)
-            #if self.strict:
-            raise utils.PdfReadError("Could not find object.")
+            if self.strict:
+                raise utils.PdfReadError("Could not find object.")
         self.cacheIndirectObject(indirectReference.generation,
                     indirectReference.idnum, retval)
         return retval
